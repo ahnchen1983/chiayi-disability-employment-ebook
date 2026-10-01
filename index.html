@@ -7,6 +7,14 @@
   <meta name="description" content="嘉義縣身心障礙者就業促進業務成果宣導計畫電子繪本">
   <title>我學會了看見不一樣｜嘉義縣電子繪本</title>
   <script>if (window.top !== window.self) document.documentElement.classList.add('embed-mode');</script>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-48TR857SJS"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-48TR857SJS', { send_page_view: false });
+  </script>
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23111827'/%3E%3Cpath d='M13 18h38v28H13z' fill='%23facc15'/%3E%3Cpath d='M32 18v28' stroke='%23111827' stroke-width='3'/%3E%3Ccircle cx='23' cy='31' r='5' fill='%23111827'/%3E%3Ccircle cx='41' cy='31' r='5' fill='%23111827'/%3E%3C/svg%3E">
   <style>
     :root {
@@ -189,8 +197,12 @@
       let index = 1;
       let busy = false;
       let touchX = 0;
+      let hasOpened = false;
 
       function label(n) { return n === 1 ? '封面' : `第 ${n - 1} 個跨頁`; }
+      function track(name, params = {}) {
+        if (typeof window.gtag === 'function') window.gtag('event', name, params);
+      }
       function preload(n) { if (n >= 1 && n <= total) { const img = new Image(); img.src = page(n); } }
       function fitRatio(n) {
         const img = new Image();
@@ -210,8 +222,13 @@
         fitRatio(index);
         preload(index - 1); preload(index + 1);
         history.replaceState(null, '', `#page-${index}`);
+        track('page_view', { page_title: `我學會了看見不一樣 - ${label(index)}`, page_number: index, page_location: location.href });
+        if (!hasOpened) {
+          track('ebook_open', { page_number: index, page_label: label(index) });
+          hasOpened = true;
+        }
       }
-      function go(direction) {
+      function go(direction, interaction = 'button') {
         if (busy) return;
         const target = index + direction;
         if (target < 1 || target > total) return;
@@ -224,28 +241,38 @@
         currentSheet.addEventListener('animationend', () => {
           index = target;
           currentSheet.classList.remove('turn-next', 'turn-prev');
+          track('flip_page', { from_page: index - direction, to_page: index, page_number: index, direction: direction > 0 ? 'next' : 'previous', interaction });
           render();
           busy = false;
         }, { once: true });
       }
-      function jump(n) { if (!busy && n >= 1 && n <= total && n !== index) { index = n; render(); } }
+      function jump(n) {
+        if (!busy && n >= 1 && n <= total && n !== index) {
+          const fromPage = index;
+          index = n;
+          track('jump_to_page', { from_page: fromPage, to_page: index, page_number: index, interaction: 'button' });
+          render();
+        }
+      }
 
-      prev.addEventListener('click', () => go(-1));
-      next.addEventListener('click', () => go(1));
+      prev.addEventListener('click', () => go(-1, 'button'));
+      next.addEventListener('click', () => go(1, 'button'));
       document.getElementById('first').addEventListener('click', () => jump(1));
       document.getElementById('fullscreen').addEventListener('click', () => {
         const target = document.querySelector('.reader');
+        const action = document.fullscreenElement ? 'exit' : 'enter';
+        track('fullscreen', { action });
         if (!document.fullscreenElement) target.requestFullscreen?.(); else document.exitFullscreen?.();
       });
       document.addEventListener('keydown', (event) => {
-        if (event.key === 'ArrowRight' || event.key === 'PageDown') { event.preventDefault(); go(1); }
-        if (event.key === 'ArrowLeft' || event.key === 'PageUp') { event.preventDefault(); go(-1); }
+        if (event.key === 'ArrowRight' || event.key === 'PageDown') { event.preventDefault(); go(1, 'keyboard'); }
+        if (event.key === 'ArrowLeft' || event.key === 'PageUp') { event.preventDefault(); go(-1, 'keyboard'); }
         if (event.key === 'Home') { event.preventDefault(); jump(1); }
       });
       stage.addEventListener('pointerdown', (event) => { touchX = event.clientX; });
       stage.addEventListener('pointerup', (event) => {
         const delta = event.clientX - touchX;
-        if (Math.abs(delta) > 48) go(delta < 0 ? 1 : -1);
+        if (Math.abs(delta) > 48) go(delta < 0 ? 1 : -1, 'swipe');
       });
       const hashMatch = location.hash.match(/page-(\d+)/);
       if (hashMatch) index = Math.min(total, Math.max(1, Number(hashMatch[1])));
