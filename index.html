@@ -194,6 +194,7 @@
       const progressBar = document.getElementById('progressBar');
       const prev = document.getElementById('prev');
       const next = document.getElementById('next');
+      const fullscreenButton = document.getElementById('fullscreen');
       let index = 1;
       let busy = false;
       let touchX = 0;
@@ -258,11 +259,28 @@
       prev.addEventListener('click', () => go(-1, 'button'));
       next.addEventListener('click', () => go(1, 'button'));
       document.getElementById('first').addEventListener('click', () => jump(1));
-      document.getElementById('fullscreen').addEventListener('click', () => {
+      const openStandalone = () => {
+        const standaloneUrl = new URL(location.href);
+        track('open_standalone', { page_number: index, page_label: label(index) });
+        window.open(standaloneUrl.href, '_blank', 'noopener');
+      };
+      if (window.top !== window.self) {
+        fullscreenButton.textContent = '獨立開啟';
+        fullscreenButton.setAttribute('aria-label', '在新分頁獨立開啟電子書');
+      }
+      fullscreenButton.addEventListener('click', () => {
         const target = document.querySelector('.reader');
+        if (window.top !== window.self || !document.fullscreenEnabled || !target.requestFullscreen) {
+          openStandalone();
+          return;
+        }
         const action = document.fullscreenElement ? 'exit' : 'enter';
         track('fullscreen', { action });
-        if (!document.fullscreenElement) target.requestFullscreen?.(); else document.exitFullscreen?.();
+        if (!document.fullscreenElement) {
+          target.requestFullscreen().catch(() => openStandalone());
+        } else {
+          document.exitFullscreen?.();
+        }
       });
       document.addEventListener('keydown', (event) => {
         if (event.key === 'ArrowRight' || event.key === 'PageDown') { event.preventDefault(); go(1, 'keyboard'); }
