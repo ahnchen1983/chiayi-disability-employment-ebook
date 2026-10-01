@@ -6,7 +6,12 @@
   <meta name="theme-color" content="#111827">
   <meta name="description" content="嘉義縣身心障礙者就業促進業務成果宣導計畫電子繪本">
   <title>我學會了看見不一樣｜嘉義縣電子繪本</title>
-  <script>if (window.top !== window.self) document.documentElement.classList.add('embed-mode');</script>
+  <script>
+    if (window.top !== window.self) document.documentElement.classList.add('embed-mode');
+    if (window.matchMedia && window.matchMedia('(max-width: 720px)').matches) {
+      document.documentElement.classList.add('mobile-mode');
+    }
+  </script>
   <!-- Google tag (gtag.js) -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-48TR857SJS"></script>
   <script>
@@ -70,7 +75,8 @@
       aspect-ratio: var(--ratio, 1 / 1);
       perspective: 2100px;
       filter: drop-shadow(0 22px 26px rgba(0,0,0,.28));
-      touch-action: pan-y;
+      /* Keep pinch-zoom available on touch devices while still allowing swipes. */
+      touch-action: pan-x pan-y pinch-zoom;
     }
     .sheet {
       position: absolute;
@@ -107,17 +113,39 @@
     .progress > span { display: block; width: 0; height: 100%; border-radius: inherit; background: linear-gradient(90deg, var(--yellow), #fb923c); transition: width .3s ease; }
     .footer { display: flex; justify-content: space-between; gap: 16px; margin-top: 13px; color: var(--muted); font-size: .86rem; }
     .footer span:last-child { text-align: right; }
+    .music-button[aria-pressed="true"] { border-color: var(--yellow); color: var(--yellow-2); }
     @media (max-width: 720px) {
-      .shell { width: min(100% - 20px, 1180px); padding-top: 20px; }
-      header { align-items: start; flex-direction: column; gap: 8px; }
-      .counter { align-self: flex-end; margin-top: -32px; }
-      .book-wrap { min-height: 55vh; padding: 16px 42px; border-radius: 18px; }
+      /* Phone reading mode: remove the desktop card and let the spread use the full viewport. */
+      html, body { min-height: 100%; overflow-x: hidden; }
+      .shell { width: 100%; padding: max(10px, env(safe-area-inset-top)) 0 max(8px, env(safe-area-inset-bottom)); }
+      header { display: block; position: relative; padding: 9px 16px 10px; margin: 0; }
+      header > div:first-child { padding-right: 112px; }
+      .eyebrow { margin-bottom: 5px; font-size: .72rem; }
+      h1 { font-size: clamp(1.28rem, 5.8vw, 1.72rem); }
+      .hint { margin-top: 5px; font-size: .78rem; line-height: 1.35; }
+      .counter { position: absolute; top: 50%; right: 16px; transform: translateY(-50%); font-size: .78rem; }
+      .book-wrap { height: calc(100svh - 176px); min-height: 52svh; max-height: 700px; padding: 0; border: 0; border-radius: 0; background: #000; box-shadow: none; }
+      .book-wrap::before, .book-wrap::after { display: none; }
+      .stage { width: 100%; height: 100%; aspect-ratio: auto; filter: none; touch-action: pan-x pan-y pinch-zoom; }
+      .sheet { border-radius: 0; background: #000; }
+      .sheet img { background: #000; touch-action: inherit; }
       .nav { padding: 0 6px; }
       .nav button { width: 36px; height: 52px; border-radius: 10px; font-size: 1.25rem; }
-      .controls { flex-wrap: wrap; }
+      .controls { flex-wrap: wrap; margin: 8px 14px 0; gap: 7px; }
+      .control-btn { min-height: 38px; padding: 0 12px; font-size: .82rem; }
       .progress { order: 3; flex-basis: 100%; }
-      .footer { flex-direction: column; gap: 6px; }
-      .footer span:last-child { text-align: left; }
+      .footer { flex-direction: column; gap: 4px; margin: 7px 14px 0; text-align: center; font-size: .72rem; }
+      .footer span:last-child { text-align: center; }
+    }
+    @media (max-width: 720px) and (orientation: landscape) {
+      header { padding: 5px 12px 6px; }
+      header > div:first-child { padding-right: 150px; }
+      .eyebrow, .hint { display: none; }
+      h1 { font-size: 1.05rem; }
+      .counter { right: 12px; font-size: .76rem; }
+      .book-wrap { height: calc(100svh - 84px); min-height: 0; }
+      .controls { margin-top: 5px; }
+      .footer { display: none; }
     }
     /* Compact layout for small Google Sites embed frames such as 676 x 329. */
     @media (max-height: 500px) {
@@ -146,6 +174,30 @@
     html.embed-mode .controls { height: 36px; margin-top: 7px; gap: 7px; }
     html.embed-mode .control-btn { min-height: 34px; padding: 0 11px; border-radius: 9px; font-size: .82rem; }
     html.embed-mode .progress { height: 5px; }
+    /* Mobile overrides intentionally come after the embed rules so Google Sites embeds also work on phones. */
+    @media (max-width: 720px) {
+      html.mobile-mode .shell { width: 100%; height: 100svh; padding: max(10px, env(safe-area-inset-top)) 0 max(8px, env(safe-area-inset-bottom)); }
+      html.mobile-mode header { display: block; position: relative; padding: 9px 16px 10px; margin: 0; }
+      html.mobile-mode header > div:first-child { padding-right: 112px; }
+      html.mobile-mode .book-wrap { height: calc(100svh - 176px); min-height: 52svh; max-height: 700px; padding: 0; border: 0; border-radius: 0; background: #000; box-shadow: none; }
+      html.mobile-mode .book-wrap::before, html.mobile-mode .book-wrap::after { display: none; }
+      html.mobile-mode .stage { width: 100%; height: 100%; aspect-ratio: auto; filter: none; touch-action: pan-x pan-y pinch-zoom; }
+      html.mobile-mode .sheet { border-radius: 0; background: #000; }
+      html.mobile-mode .sheet img { background: #000; touch-action: inherit; }
+      html.mobile-mode .controls { height: auto; margin: 8px 14px 0; gap: 7px; }
+      html.mobile-mode .control-btn { min-height: 38px; padding: 0 12px; border-radius: 11px; font-size: .82rem; }
+      html.mobile-mode .progress { height: 5px; }
+      html.mobile-mode .footer { display: flex; flex-direction: column; gap: 4px; margin: 7px 14px 0; text-align: center; font-size: .72rem; }
+      html.mobile-mode .footer span:last-child { text-align: center; }
+    }
+    @media (max-width: 720px) and (max-height: 500px) {
+      html.mobile-mode .shell { padding: 4px 0; }
+      html.mobile-mode header { display: none; }
+      html.mobile-mode .book-wrap { height: calc(100svh - 48px); min-height: 0; }
+      html.mobile-mode .controls { height: 40px; margin: 5px 8px 0; }
+      html.mobile-mode .control-btn { min-height: 34px; padding: 0 10px; }
+      html.mobile-mode .footer { display: none; }
+    }
   </style>
 </head>
 <body>
@@ -173,6 +225,7 @@
       <div class="controls">
         <button class="control-btn" id="first" type="button">回到封面</button>
         <button class="control-btn" id="fullscreen" type="button">全螢幕</button>
+        <button class="control-btn music-button" id="music" type="button" aria-pressed="false">播放音樂</button>
         <div class="progress" aria-hidden="true"><span id="progressBar"></span></div>
       </div>
       <div class="footer">
@@ -181,6 +234,9 @@
       </div>
     </section>
   </main>
+  <audio id="backgroundMusic" loop preload="metadata">
+    <source src="繪本背景音樂_試聽版.wav" type="audio/wav">
+  </audio>
 
   <script>
     (() => {
@@ -195,9 +251,13 @@
       const prev = document.getElementById('prev');
       const next = document.getElementById('next');
       const fullscreenButton = document.getElementById('fullscreen');
+      const musicButton = document.getElementById('music');
+      const backgroundMusic = document.getElementById('backgroundMusic');
       let index = 1;
       let busy = false;
       let touchX = 0;
+      let activePointers = new Set();
+      let gestureHadMultiplePointers = false;
       let hasOpened = false;
 
       function label(n) { return n === 1 ? '封面' : `第 ${n - 1} 個跨頁`; }
@@ -259,6 +319,35 @@
       prev.addEventListener('click', () => go(-1, 'button'));
       next.addEventListener('click', () => go(1, 'button'));
       document.getElementById('first').addEventListener('click', () => jump(1));
+      backgroundMusic.volume = 0.22;
+      function updateMusicButton() {
+        const playing = !backgroundMusic.paused;
+        musicButton.textContent = playing ? '暫停音樂' : '播放音樂';
+        musicButton.setAttribute('aria-pressed', String(playing));
+      }
+      async function startMusic() {
+        try {
+          await backgroundMusic.play();
+          updateMusicButton();
+          track('background_music', { action: 'play' });
+        } catch (_) {
+          updateMusicButton();
+        }
+      }
+      musicButton.addEventListener('click', async () => {
+        if (backgroundMusic.paused) {
+          await startMusic();
+        } else {
+          backgroundMusic.pause();
+          updateMusicButton();
+          track('background_music', { action: 'pause' });
+        }
+      });
+      backgroundMusic.addEventListener('play', updateMusicButton);
+      backgroundMusic.addEventListener('pause', updateMusicButton);
+      document.addEventListener('pointerdown', (event) => {
+        if (event.target !== musicButton && backgroundMusic.paused) startMusic();
+      }, { once: true });
       const openStandalone = () => {
         const standaloneUrl = new URL(location.href);
         track('open_standalone', { page_number: index, page_label: label(index) });
@@ -287,10 +376,22 @@
         if (event.key === 'ArrowLeft' || event.key === 'PageUp') { event.preventDefault(); go(-1, 'keyboard'); }
         if (event.key === 'Home') { event.preventDefault(); jump(1); }
       });
-      stage.addEventListener('pointerdown', (event) => { touchX = event.clientX; });
+      stage.addEventListener('pointerdown', (event) => {
+        activePointers.add(event.pointerId);
+        if (activePointers.size > 1) gestureHadMultiplePointers = true;
+        touchX = event.clientX;
+      });
       stage.addEventListener('pointerup', (event) => {
+        const wasMultiTouch = gestureHadMultiplePointers;
+        activePointers.delete(event.pointerId);
+        if (activePointers.size === 0) gestureHadMultiplePointers = false;
+        if (wasMultiTouch || event.pointerType === 'mouse') return;
         const delta = event.clientX - touchX;
         if (Math.abs(delta) > 48) go(delta < 0 ? 1 : -1, 'swipe');
+      });
+      stage.addEventListener('pointercancel', (event) => {
+        activePointers.delete(event.pointerId);
+        if (activePointers.size === 0) gestureHadMultiplePointers = false;
       });
       const hashMatch = location.hash.match(/page-(\d+)/);
       if (hashMatch) index = Math.min(total, Math.max(1, Number(hashMatch[1])));
